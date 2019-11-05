@@ -72,7 +72,7 @@
    https://www.logicbig.com/tutorials/core-java-tutorial/java-dynamic-proxies.html
 
 
-5：
+5：核心的实现方法
 
 public static Object newProxyInstance(ClassLoader loader,
                                           Class<?>[] interfaces,
