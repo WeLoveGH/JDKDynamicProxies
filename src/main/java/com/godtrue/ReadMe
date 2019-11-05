@@ -1,0 +1,82 @@
+1：代理模式
+   三个核心组成部分，代理类、目标类、父接口或者父类
+   调用方调用的时候，表面上看是调用代理类的功能，实际上代理类转了一道手，将对应的工作交给了目标类来实现
+
+2：静态代理
+   在源码层面比较清楚的定义出代理类、目标类、父接口或者父类，源码经过编译后直接产生对应的字节码文件
+
+3：动态代理
+   核心在于动态的理解上，这个动态是怎么体现出来的呢？主要是通过编译时动态的产生代理类，来体现的，
+   对应的代理类在源码层面是看不到的，在编译时才动态生成，所以，这里的动态就在这里体现了
+
+   实现动态代理的两个核心类
+   java.lang.reflect.Proxy —— 生成动态代理类的实例
+   java.lang.reflect.InvocationHandler —— 调用对应的执行方法，实现此接口的类，才是真正的功能增强的实现
+
+   com.sun.proxy.$Proxy0 —— JDK动态生成的代理类，他会继承 Proxy 类，且实现用户自定义的接口
+
+       /**
+        * Returns an instance of a proxy class for the specified interfaces
+        * that dispatches method invocations to the specified invocation
+        * handler.
+        *
+        * <p>{@code Proxy.newProxyInstance} throws
+        * {@code IllegalArgumentException} for the same reasons that
+        * {@code Proxy.getProxyClass} does.
+        *
+        * @param   loader the class loader to define the proxy class
+        * @param   interfaces the list of interfaces for the proxy class
+        *          to implement
+        * @param   h the invocation handler to dispatch method invocations to
+        * @return  a proxy instance with the specified invocation handler of a
+        *          proxy class that is defined by the specified class loader
+        *          and that implements the specified interfaces
+        * @throws  IllegalArgumentException if any of the restrictions on the
+        *          parameters that may be passed to {@code getProxyClass}
+        *          are violated
+        * @throws  SecurityException if a security manager, <em>s</em>, is present
+        *          and any of the following conditions is met:
+        *          <ul>
+        *          <li> the given {@code loader} is {@code null} and
+        *               the caller's class loader is not {@code null} and the
+        *               invocation of {@link SecurityManager#checkPermission
+        *               s.checkPermission} with
+        *               {@code RuntimePermission("getClassLoader")} permission
+        *               denies access;</li>
+        *          <li> for each proxy interface, {@code intf},
+        *               the caller's class loader is not the same as or an
+        *               ancestor of the class loader for {@code intf} and
+        *               invocation of {@link SecurityManager#checkPackageAccess
+        *               s.checkPackageAccess()} denies access to {@code intf};</li>
+        *          <li> any of the given proxy interfaces is non-public and the
+        *               caller class is not in the same {@linkplain Package runtime package}
+        *               as the non-public interface and the invocation of
+        *               {@link SecurityManager#checkPermission s.checkPermission} with
+        *               {@code ReflectPermission("newProxyInPackage.{package name}")}
+        *               permission denies access.</li>
+        *          </ul>
+        * @throws  NullPointerException if the {@code interfaces} array
+        *          argument or any of its elements are {@code null}, or
+        *          if the invocation handler, {@code h}, is
+        *          {@code null}
+        */
+       @CallerSensitive
+       public static Object newProxyInstance(ClassLoader loader,
+                                             Class<?>[] interfaces,
+                                             InvocationHandler h)
+
+       这个方法是生成动态代理对象的核心方法，指明生成此实例的类加载器、动态代理类应该实现的接口列表、代理类功能增强的调用处理器（对应的功能增强，会硬编码在动态代理类的实现方法中）
+
+
+4：参考资料
+   https://www.logicbig.com/tutorials/core-java-tutorial/java-dynamic-proxies.html
+
+
+5：
+
+public static Object newProxyInstance(ClassLoader loader,
+                                          Class<?>[] interfaces,
+                                          InvocationHandler h)
+
+private static Class<?> getProxyClass0(ClassLoader loader,
+                                           Class<?>... interfaces)
