@@ -1,17 +1,19 @@
-package com.godtrue.DynamicallyProxies.InterceptMethodCallsUsingDynamicProxy;
+package com.godtrue.cglib;
 
 import com.godtrue.DynamicallyProxies.SaveProxyByteCodeUtil;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @description：
  * @author：qianyingjie1
- * @create：2019-11-04
+ * @create：2019-11-06
  */
-public class MyInterceptorExample {
-
+public class JDKDynamicallyProxySample {
     public static void main(String[] args) {
 
         /**
@@ -20,36 +22,77 @@ public class MyInterceptorExample {
         SaveProxyByteCodeUtil.saveProxyByteCode();
 
         /**
-         * 获取list的代理类，这个是核心，这个代理类是有JVM自动生成的，实现了 java.lang.Object 和 java.util.List 的方法
+         * 构建一个列表对象，并且加入若干元素
          */
-        List<String> list = MyInterceptor.getProxy(new ArrayList<String>(), List.class);
-        list.add("one");
-        list.add("two");
-        System.out.println(list);
-        list.remove("one");
+        List<String> ary = new ArrayList<String>();
+        ary.add("Hello");
+        ary.add("Proxy");
+        ary.add("World!!");
 
+        /**
+         * 通过JDK的代理类获取动态代理类的实例，这块是核心，proxyAry 这个已经是 list 的代理类了，是JVM自动生成的，且直接生产了字节码文件，没有源代码，这也是称为动态的原因
+         */
+        @SuppressWarnings("unchecked")
+        List<String> proxyAry = (List<String>) Proxy.newProxyInstance(JDKDynamicallyProxySample.class.getClassLoader(), new Class<?>[]{List.class}, new MyInvocationHandler(ary));
+
+        /**
+         * 循环遍历且打印列表的内容，注意：放入三个元素，如果不使用代理来增强其功能，获取第四个元素时是会直接报错的，这里没有报错，直接打印了一个 Bow!!
+         */
+        for (int i = 0; i < 4; i++) {
+            log(proxyAry.get(i));
+        }
+    }
+
+    static class MyInvocationHandler implements InvocationHandler {
+
+        private List<String> ary;
+
+        public MyInvocationHandler(List<String> ary) {
+            this.ary = ary;
+        }
+
+        /**
+         * 调用处理器增强的方法，这块也是核心，代理类的功能增强就在这里
+         * @param proxy
+         * @param method
+         * @param args
+         * @return
+         * @throws Throwable
+         */
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            if (isFouthGet(method, args)) {
+                return "Bow!!";
+            }
+            return method.invoke(ary, args);
+        }
+
+        private boolean isFouthGet(Method method, Object[] args) {
+            return "get".equals(method.getName()) && ((Integer)args[0]) == 3;
+        }
+    }
+
+    private static void log(Object msg) {
+        System.out.println(msg);
     }
 }
 
-
 /**
  *
-
- 从JVM自动生成的字节码，我可以看到
+ * 如下是JVM生成的动态代理类的字节码的反编译结果，可以看出：
+ *
  1：自动生成的代理类是一个公共的常量类
  2：这个自动生产的代理类的命名方式比较特别 $Proxy0 $表示是JVM自动生成的；Proxy表示这是一个动态代理类；0表示这是JVM自动生成的第一个动态代理类
  3：这个自动生成的代理类继承了Proxy代理类
- 4：这个自动生成的代理类实现了MyInterface接口，这个接口时我们自己定义的接口
- 5：这个自动生成的代理类重写了 java.lang.Object 的 equals()/hashCode()/toString()等方法，然后，实现了我们在接口中声明的方法 getData()方法
+ 4：这个自动生成的代理类实现了List接口
+ 5：这个自动生成的代理类重写了 java.lang.Object 的 equals()/hashCode()/toString()等方法，然后，实现了我们在接口中声明的方法其他方法
  6：这个自动生成的代理类有一个有参的构造方法，底层实现调用了父类的构造方法
  7：在这个自动生成的代理类中，通过一个静态代码块利用JAVA反射获取对应的方法，这些方法是写死的，就是在代理类中重写和实现的那四个方法
  8：由此可见，动态代理的本质=代理模式+JVM动态生成代理类的字节码，动态的关键就在于代理类的字节码文件时动态生成的而已
+ 9：代理类是必须存在的，只是可以选择是自己写，还是通过编码自动生成，显然自动生成的代码更优雅一些
 
  */
 
 /*
-
-package com.sun.proxy;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;

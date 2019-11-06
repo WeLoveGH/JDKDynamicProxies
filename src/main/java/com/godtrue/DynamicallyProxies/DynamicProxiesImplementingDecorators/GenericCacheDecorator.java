@@ -119,9 +119,9 @@ public class GenericCacheDecorator implements InvocationHandler {
  *
 
  从JVM自动生成的字节码，我可以看到
- 1：自动生成的代理是一个公共的常量类
+ 1：自动生成的代理类是一个公共的常量类
  2：这个自动生产的代理类的命名方式比较特别 $Proxy0 $表示是JVM自动生成的；Proxy表示这是一个动态代理类；0表示这是JVM自动生成的第一个动态代理类
- 3：这个自动生成的代理诶继承了Proxy代理类
+ 3：这个自动生成的代理类继承了Proxy代理类
  4：这个自动生成的代理类实现了MyInterface接口，这个接口时我们自己定义的接口
  5：这个自动生成的代理类重写了 java.lang.Object 的 equals()/hashCode()/toString()等方法，然后，实现了我们在接口中声明的方法 getData()方法
  6：这个自动生成的代理类有一个有参的构造方法，底层实现调用了父类的构造方法
